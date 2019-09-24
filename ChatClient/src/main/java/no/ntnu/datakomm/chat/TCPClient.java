@@ -42,6 +42,15 @@ public class TCPClient {
                 System.out.println("Socket error: " + e.getMessage());
                 e.printStackTrace();
             }
+        catch (SecurityException e)
+            {
+                System.out.println(e.getMessage());
+            }
+        catch (IllegalArgumentException e)
+            {
+                System.out.println("ERROR! Port value out of bounds.");
+            }
+
 
 
 
