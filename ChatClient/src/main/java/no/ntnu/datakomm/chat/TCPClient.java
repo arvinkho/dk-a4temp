@@ -31,11 +31,11 @@ public class TCPClient {
         try
             {
                 this.connection = new Socket(host, port);
-                connected = this.connection.isConnected();
                 this.in = this.connection.getInputStream();
                 this.out = this.connection.getOutputStream();
                 this.toServer = new PrintWriter(this.out, true);
                 this.fromServer = new BufferedReader(new InputStreamReader(this.in));
+                connected = this.connection.isConnected();
 
 
             }
@@ -94,7 +94,7 @@ public class TCPClient {
         boolean commandSent = false;
         if(isConnectionActive())
             {
-                String[] command = cmd.split(" ", 1);
+                String[] command = cmd.split(" ", 2);
                 String commandWord = command[0];
                 String optionalParameter = command[1];
                 String commandToSend = commandWord + optionalParameter + "\n";
@@ -114,10 +114,18 @@ public class TCPClient {
      * @return true if message sent, false on error
      */
     public boolean sendPublicMessage(String message) {
+
+        boolean messageSent = false;
+        String messageToSend = "msg " + message;
+
+        if(sendCommand(messageToSend))
+            {
+                messageSent = true;
+            }
         // TODO Step 2: implement this method
         // Hint: Reuse sendCommand() method
         // Hint: update lastError if you want to store the reason for the error.
-        return false;
+        return messageSent;
     }
 
     /**
