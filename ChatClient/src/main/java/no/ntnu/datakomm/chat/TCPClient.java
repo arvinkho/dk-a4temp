@@ -34,6 +34,8 @@ public class TCPClient {
                 connected = this.connection.isConnected();
                 this.in = this.connection.getInputStream();
                 this.out = this.connection.getOutputStream();
+                this.toServer = new PrintWriter(this.out, true);
+                this.fromServer = new BufferedReader(new InputStreamReader(this.in));
 
 
             }
@@ -89,9 +91,20 @@ public class TCPClient {
      * @return true on success, false otherwise
      */
     private boolean sendCommand(String cmd) {
+        boolean commandSent = false;
+        if(isConnectionActive())
+            {
+                String[] command = cmd.split(" ", 1);
+                String commandWord = command[0];
+                String optionalParameter = command[1];
+                String commandToSend = commandWord + optionalParameter + "\n";
+
+                this.toServer.write(commandToSend);
+                commandSent = true;
+            }
         // TODO Step 2: Implement this method
         // Hint: Remember to check if connection is active
-        return false;
+        return commandSent;
     }
 
     /**
