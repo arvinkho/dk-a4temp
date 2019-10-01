@@ -2,6 +2,7 @@ package no.ntnu.datakomm.chat;
 
 import java.io.*;
 import java.net.*;
+import java.sql.SQLOutput;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -77,10 +78,10 @@ public class TCPClient {
                 try
                     {
                         this.connection.close();
-                        if(!isConnectionActive())
-                            {
-                                onDisconnect();
-                            }
+                        onDisconnect();
+                        this.connection = null;
+                        this.toServer = null;
+                        this.fromServer = null;
                     }
                 catch (IOException e)
                     {
@@ -111,7 +112,7 @@ public class TCPClient {
                 String[] command = cmd.split(" ", 2);
                 String commandWord = command[0];
                 String optionalParameter = command[1];
-                String commandToSend = commandWord + " " + optionalParameter + "\n";
+                String commandToSend = commandWord + " " + optionalParameter;
 
                 this.toServer.println(commandToSend);
                 commandSent = true;
@@ -207,15 +208,8 @@ public class TCPClient {
                     }
                 catch (IOException e)
                     {
-                        e.printStackTrace();
-                        try
-                            {
-                                this.connection.close();
-                            }
-                        catch (IOException ex)
-                            {
-                                ex.printStackTrace();
-                            }
+                        System.out.println(e.getMessage());
+                        disconnect();
                     }
             }
         // TODO Step 3: Implement this method
@@ -243,10 +237,17 @@ public class TCPClient {
      */
     public void startListenThread() {
         // Call parseIncomingCommands() in the new thread.
-        Thread t = new Thread(() -> {
-            parseIncomingCommands();
-        });
-        t.start();
+        try
+            {
+                Thread t = new Thread(() -> {
+                    parseIncomingCommands();
+                });
+                t.start();
+            }
+        catch (NullPointerException e)
+            {
+                System.out.println(e.getMessage());
+            }
     }
 
     /**
