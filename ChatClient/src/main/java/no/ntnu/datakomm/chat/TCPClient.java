@@ -264,6 +264,10 @@ public class TCPClient {
 
             String[] serverResponseArr = serverResponse.split(" ", 2);
             String inputCase = serverResponseArr[0];
+            String extraParameters;
+            String[] extraParametersArr;
+            String sender;
+            String text;
 
             switch (inputCase)
                 {
@@ -272,12 +276,42 @@ public class TCPClient {
                         break;
 
                     case "loginerr":
-                        onLoginResult(false, serverResponseArr[1]);
+                        extraParameters = serverResponseArr[1];
+                        onLoginResult(false, extraParameters);
                         break;
 
                     case "users":
-                        String[] users = serverResponseArr[1].split(" ");
+                        extraParameters = serverResponseArr[1];
+                        String[] users = extraParameters.split(" ");
                         onUserList(users);
+                        break;
+
+                    case "msg":
+                        extraParameters = serverResponseArr[1];
+                        extraParametersArr = extraParameters.split(" ", 2);
+                        sender = extraParametersArr[0];
+                        text = extraParametersArr[1];
+                        onMsgReceived(false, sender, text);
+                        break;
+
+                    case "privmsg":
+                        extraParameters = serverResponseArr[1];
+                        extraParametersArr = extraParameters.split(" ", 2);
+                        sender = extraParametersArr[0];
+                        text = extraParametersArr[1];
+                        onMsgReceived(true, sender, text);
+                        break;
+
+                    case "msgerr":
+                        extraParameters = serverResponseArr[1];
+                        onMsgError(extraParameters);
+                        break;
+
+                    case "cmderr":
+                        extraParameters = serverResponseArr[1];
+                        onCmdError(extraParameters);
+                        break;
+
 
                     default:
                         break;
@@ -376,6 +410,11 @@ public class TCPClient {
      * @param text   Message text
      */
     private void onMsgReceived(boolean priv, String sender, String text) {
+        TextMessage msg = new TextMessage(sender, priv, text);
+        for(ChatListener l : listeners)
+            {
+                l.onMessageReceived(msg);
+            }
         // TODO Step 7: Implement this method
     }
 
@@ -385,6 +424,11 @@ public class TCPClient {
      * @param errMsg Error description returned by the server
      */
     private void onMsgError(String errMsg) {
+
+        for(ChatListener l : listeners)
+            {
+                l.onMessageError(errMsg);
+            }
         // TODO Step 7: Implement this method
     }
 
@@ -394,6 +438,11 @@ public class TCPClient {
      * @param errMsg Error message
      */
     private void onCmdError(String errMsg) {
+
+        for(ChatListener l : listeners)
+            {
+                l.onCommandError(errMsg);
+            }
         // TODO Step 7: Implement this method
     }
 
