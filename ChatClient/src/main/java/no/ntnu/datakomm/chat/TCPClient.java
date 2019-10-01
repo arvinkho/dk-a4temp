@@ -71,6 +71,22 @@ public class TCPClient {
      * that no two threads call this method in parallel.
      */
     public synchronized void disconnect() {
+
+        if(isConnectionActive())
+            {
+                try
+                    {
+                        this.connection.close();
+                        if(!isConnectionActive())
+                            {
+                                onDisconnect();
+                            }
+                    }
+                catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+            }
         // TODO Step 4: implement this method
         // Hint: remember to check if connection is active
     }
@@ -323,6 +339,10 @@ public class TCPClient {
      * Internet error)
      */
     private void onDisconnect() {
+        for (ChatListener l : listeners)
+            {
+                l.onDisconnect();
+            }
         // TODO Step 4: Implement this method
         // Hint: all the onXXX() methods will be similar to onLoginResult()
     }
