@@ -9,8 +9,6 @@ public class TCPClient {
     private PrintWriter toServer;
     private BufferedReader fromServer;
     private Socket connection;
-    private InputStream in;
-    private OutputStream out;
 
     // Hint: if you want to store a message for the last error, store it here
     private String lastError = null;
@@ -31,11 +29,11 @@ public class TCPClient {
         try
             {
                 this.connection = new Socket(host, port);
-                this.in = this.connection.getInputStream();
-                this.out = this.connection.getOutputStream();
-                this.toServer = new PrintWriter(this.out, true);
-                this.fromServer = new BufferedReader(new InputStreamReader(this.in));
                 connected = this.connection.isConnected();
+                InputStream in = this.connection.getInputStream();
+                OutputStream out = this.connection.getOutputStream();
+                this.toServer = new PrintWriter(out, true);
+                this.fromServer = new BufferedReader(new InputStreamReader(in));
 
 
             }
@@ -97,9 +95,9 @@ public class TCPClient {
                 String[] command = cmd.split(" ", 2);
                 String commandWord = command[0];
                 String optionalParameter = command[1];
-                String commandToSend = commandWord + optionalParameter + "\n";
+                String commandToSend = commandWord + " " + optionalParameter + "\n";
 
-                this.toServer.write(commandToSend);
+                this.toServer.println(commandToSend);
                 commandSent = true;
             }
         // TODO Step 2: Implement this method
@@ -189,6 +187,7 @@ public class TCPClient {
                 try
                     {
                         response = fromServer.readLine();
+
                     }
                 catch (IOException e)
                     {
@@ -240,6 +239,28 @@ public class TCPClient {
      */
     private void parseIncomingCommands() {
         while (isConnectionActive()) {
+
+            String serverResponse = waitServerResponse();
+
+            String[] serverResponseArr = serverResponse.split(" ", 2);
+            String inputCase = serverResponseArr[0];
+
+            switch (inputCase)
+                {
+                    case "loginok":
+                        onLoginResult(true, "");
+                        break;
+
+                    case "loginerr":
+                        onLoginResult(false, serverResponseArr[1]);
+                        break;
+
+                    default:
+                        break;
+                }
+        }
+
+
             // TODO Step 3: Implement this method
             // Hint: Reuse waitServerResponse() method
             // Hint: Have a switch-case (or other way) to check what type of response is received from the server
@@ -256,8 +277,6 @@ public class TCPClient {
             // Hint for Step 7: call corresponding onXXX() methods which will notify all the listeners
 
             // TODO Step 8: add support for incoming supported command list (type: supported)
-
-        }
     }
 
     /**
