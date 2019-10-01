@@ -190,6 +190,10 @@ public class TCPClient {
      * Send a request for the list of commands that server supports.
      */
     public void askSupportedCommands() {
+        if(isConnectionActive())
+            {
+                sendCommand("help ");
+            }
         // TODO Step 8: Implement this method
         // Hint: Reuse sendCommand() method
     }
@@ -311,6 +315,11 @@ public class TCPClient {
                         extraParameters = serverResponseArr[1];
                         onCmdError(extraParameters);
                         break;
+
+                    case "supported":
+                        extraParameters = serverResponseArr[1];
+                        String[] supportedCommands = extraParameters.split(" ");
+                        onSupported(supportedCommands);
 
 
                     default:
@@ -453,6 +462,10 @@ public class TCPClient {
      * @param commands Commands supported by the server
      */
     private void onSupported(String[] commands) {
+        for(ChatListener l : listeners)
+            {
+                l.onSupportedCommands(commands);
+            }
         // TODO Step 8: Implement this method
     }
 }
