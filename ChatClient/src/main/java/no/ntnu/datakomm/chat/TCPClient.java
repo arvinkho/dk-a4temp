@@ -109,12 +109,7 @@ public class TCPClient {
         boolean commandSent = false;
         if(isConnectionActive())
             {
-                String[] command = cmd.split(" ", 2);
-                String commandWord = command[0];
-                String optionalParameter = command[1];
-                String commandToSend = commandWord + " " + optionalParameter;
-
-                this.toServer.println(commandToSend);
+                this.toServer.println(cmd);
                 commandSent = true;
             }
         // TODO Step 2: Implement this method
@@ -163,6 +158,10 @@ public class TCPClient {
      * clear your current user list and use events in the listener.
      */
     public void refreshUserList() {
+        if(isConnectionActive())
+            {
+                sendCommand("users ");
+            }
         // TODO Step 5: implement this method
         // Hint: Use Wireshark and the provided chat client reference app to find out what commands the
         // client and server exchange for user listing.
@@ -272,6 +271,10 @@ public class TCPClient {
                         onLoginResult(false, serverResponseArr[1]);
                         break;
 
+                    case "users":
+                        String[] users = serverResponseArr[1].split(" ");
+                        onUserList(users);
+
                     default:
                         break;
                 }
@@ -353,7 +356,11 @@ public class TCPClient {
      *
      * @param users List with usernames
      */
-    private void onUsersList(String[] users) {
+    private void onUserList(String[] users) {
+        for(ChatListener l : listeners)
+            {
+                l.onUserList(users);
+            }
         // TODO Step 5: Implement this method
     }
 
